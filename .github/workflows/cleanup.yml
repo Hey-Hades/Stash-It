@@ -1,0 +1,23 @@
+name: Supabase Cleanup
+
+on:
+  schedule:
+    - cron: "*/5 * * * *" # runs every 5 minutes
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Supabase Cleanup
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.SERVICE_ROLE_KEY }}
+        run: |
+          echo "Calling Supabase cleanup function..."
+          RESPONSE=$(curl -s -w "%{http_code}" -o response.txt -X POST \
+            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "x-service-key: $SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            https://auwjiuhlsjaulczynkwu.supabase.co/functions/v1/cleanup)
+          echo "HTTP status code: $RESPONSE"
+          cat response.txt
