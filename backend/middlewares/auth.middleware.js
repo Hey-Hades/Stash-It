@@ -4,14 +4,15 @@ import supabase from "../config/supabaseClient.js";
 const protect = asyncHandler(async (req, res, next) => {
   const { stashKey } = req.query;
 
-  if (!stashKey.trim()) {
+  // Added safety check: prevents server crash if stashKey is undefined or empty
+  if (!stashKey || !stashKey.trim()) {
     return res.status(400).json({ message: "stash key is required" });
   }
 
   const { data, error } = await supabase
     .from("stash")
     .select("*")
-    .eq("stash_key", stashKey);
+    .eq("stash_key", stashKey.trim());
 
   if (error) {
     return res.status(500).json({ message: error.message });

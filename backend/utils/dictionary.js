@@ -119,7 +119,7 @@ export const pokemonCharacters = [
   "Raikou",
   "Entei",
   "Lugia",
-  "Ho-Oh",
+  "Hooh",
   "Celebi",
 ];
 
@@ -174,6 +174,18 @@ export const chemicalElements = [
   "Radon",
   "Radium",
   "Curium",
+];
+
+export const techStack = [
+  "react", "node", "mongo", "python", "express",
+  "oracle", "cloud", "docker", "socket", "linux",
+  "mqtt", "coap", "amqp", "nexus", "mesh"
+];
+
+export const algoTerms = [
+  "graph", "tree", "array", "heap", "stack",
+  "queue", "hash", "matrix", "pivot", "cipher",
+  "vertex", "edge", "trie", "deque", "pointer"
 ];
 
 export const weirdVocab = [
