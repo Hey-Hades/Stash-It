@@ -1,34 +1,79 @@
-# 📦 StashIt
+# 📦 Stash-It
 
-> **Share files instantly using simple keys.**
+A secure file-sharing platform that lets users upload files, share them through unique keys, and download them with expiry-based access control.
 
-StashIt is a lightweight file-sharing tool where you can **stash files** on the server and **access them later using a unique key**. No accounts, no logins—just stash and retrieve.
-
----
+🌐 **Live Demo:** https://stash-it-zen.vercel.app
 
 ## ✨ Features
 
-- ⚡ **Fast & Simple** – Upload and access with a unique key.
-- 🔑 **Key-based Access** – Share files securely with anyone who has the key.
-- 📂 **Backend + Frontend** – Complete full-stack setup.
-- 🌍 **Cross-Device Access** – Works on desktop and mobile browsers.
-
----
+- 📁 Multi-file upload
+- 📝 Text snippet sharing
+- 🔗 Unique share keys
+- ⏳ Expiry options (One-time, 30 min, 1 hour)
+- ☁️ Supabase Storage integration
+- 🔐 Signed upload & download URLs
+- 📱 Responsive design
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React ⚛️ / Vite ⚡
-- **Backend:** Node.js + Express 🚀
-- **Database:** Supabase 🗄️
-- **Styling:** TailwindCSS 🎨
+**Frontend**
+- React
+- Vite
+- Tailwind CSS
 
----
+**Backend**
+- Node.js
+- Express.js
 
-## 🚀 Getting Started
+**Database & Storage**
+- Supabase
 
-### Clone the repo
+**Deployment**
+- Vercel(frontend)
+- Railway(backend)
+
+## ⚙️ Local Setup
 
 ```bash
-git clone https://github.com/u-cant-see-me/StashIt.git
-cd stashit
+git clone https://github.com/Hey-Hades/Stash-It.git
+cd Stash-It
 ```
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## 📸 Screenshots
+**Laptop Display**
+
+<img width="2880" height="1620" alt="image" src="https://github.com/user-attachments/assets/1080e085-583a-4ea3-89dc-78cb1ef2ba2d" />
+
+**Mobile Display**
+
+<img width="212" height="457" alt="WhatsApp Image 2026-06-15 at 15 50 37" src="https://github.com/user-attachments/assets/3b5959c6-f518-4fcf-8f89-9def500b524d" />
+
+
+
+## 👨‍💻 Author
+
+**Himanshu Sharma**
+
+Portfolio: https://himanshusharmazen-dev.vercel.app/
+
+GitHub: https://github.com/Hey-Hades
+
+## 📄 License
+
+MIT License
