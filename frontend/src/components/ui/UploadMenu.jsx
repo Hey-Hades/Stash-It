@@ -1,17 +1,10 @@
-import { useFile } from "../../contexts/FileContext";
-
-const UploadMenu = ({ menuRef, fileInputRef, setShowModal }) => {
-  const { files } = useFile();
-
-  // Hide menu when files already exist
-  if (files && files.length > 0) return null;
-
+const UploadMenu = ({ menuRef, fileInputRef, setShowModal, setShowMenu }) => {
   return (
     <div
       ref={menuRef}
       className="
         fixed
-        bottom-56
+        bottom-[171px]
         left-1/2
         -translate-x-1/2
         z-50
@@ -27,7 +20,10 @@ const UploadMenu = ({ menuRef, fileInputRef, setShowModal }) => {
       <ul className="w-40 md:w-32 bg-neutral-900/90 backdrop-blur-md border border-neutral-700/50 text-white rounded-xl shadow-xl overflow-hidden animate-fadeIn p-1">
         <li
           className="px-4 py-3 md:px-3 md:py-2 flex items-center gap-2 hover:bg-neutral-800 rounded-lg cursor-pointer transition-all duration-200"
-          onClick={() => fileInputRef.current.click()}
+          onClick={() => {
+            fileInputRef.current.click();
+            setShowMenu(false);
+          }}
         >
           <span className="text-base">📁</span>
           <span className="text-sm md:text-xs font-medium">Files</span>
@@ -35,7 +31,10 @@ const UploadMenu = ({ menuRef, fileInputRef, setShowModal }) => {
 
         <li
           className="px-4 py-3 md:px-3 md:py-2 flex items-center gap-2 hover:bg-neutral-800 rounded-lg cursor-pointer transition-all duration-200"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setShowModal(true);
+            setShowMenu(false);
+          }}
         >
           <span className="text-base">📝</span>
           <span className="text-sm md:text-xs font-medium">Text</span>

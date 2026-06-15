@@ -56,57 +56,59 @@ const AddFile = () => {
 
   return (
     <div className="relative md:absolute md:top-0 md:left-0">
-      {/* Desktop trigger */}
       {/* File Input */}
-<input
-  type="file"
-  multiple
-  className="hidden"
-  ref={fileInputRef}
-  onChange={handleChange}
-/>
+      <input
+        type="file"
+        multiple
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleChange}
+      />
 
-{/* Tablet + Desktop Trigger */}
-<div
-  className="hidden md:block relative h-20 w-20 cursor-pointer"
-  onClick={() => setShowMenu((prev) => !prev)}
->
-  <div className={`${sonarWave} sonar-delay-1 z-0`} />
-  <div className={`${sonarWave} sonar-delay-2 z-0`} />
-  <div className={`${sonarWave} sonar-delay-3 z-0`} />
+      {/* Tablet + Desktop Trigger */}
+      <div
+        className="hidden md:block relative h-20 w-20 cursor-pointer"
+        onClick={() => setShowMenu((prev) => !prev)}
+      >
+        <div className={`${sonarWave} sonar-delay-1 z-0`} />
+        <div className={`${sonarWave} sonar-delay-2 z-0`} />
+        <div className={`${sonarWave} sonar-delay-3 z-0`} />
 
-  <div className="absolute inset-0 flex items-center justify-center bg-white text-black rounded-full z-10">
-    <Plus size={25} />
-  </div>
-</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-white text-black rounded-full z-10">
+          <Plus size={25} />
+        </div>
+      </div>
 
-{/* Mobile Trigger */}
-{/* Mobile only */}
-<button
-  type="button"
-  className="
-    md:hidden
-    fixed
-    bottom-40
-    left-1/2
-    -translate-x-1/2
-    bg-white
-    text-black
-    w-14
-    h-14
-    rounded-xl
-    z-50
-  "
-  onClick={() => setShowMenu((prev) => !prev)}
->
-  <span className="text-2xl">+</span>
-</button>
+      {/* Mobile Trigger */}
+      <div
+        className="
+          md:hidden
+          fixed
+          bottom-[120px]
+          left-1/2
+          -translate-x-1/2
+          h-14
+          w-14
+          cursor-pointer
+          z-50
+        "
+        onClick={() => setShowMenu((prev) => !prev)}
+      >
+        <div className={`${sonarWave} sonar-delay-1 z-0`} />
+        <div className={`${sonarWave} sonar-delay-2 z-0`} />
+        <div className={`${sonarWave} sonar-delay-3 z-0`} />
+
+        <div className="absolute inset-0 flex items-center justify-center bg-white text-black rounded-full z-10 shadow-lg">
+          <Plus size={25} />
+        </div>
+      </div>
 
       {showMenu && (
         <UploadMenu
           menuRef={menuRef}
           fileInputRef={fileInputRef}
           setShowModal={setShowModal}
+          setShowMenu={setShowMenu} 
         />
       )}
 
