@@ -8,9 +8,18 @@ export const useDownload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const { setDownloadUrls } = useSessionContext();
+
   const sendRequest = useCallback(async (stashKey) => {
-    if (isValidStashKey(stashKey)) {
+    // 1. See what key is actually reaching this function
+    console.log("1. Hook received key:", `"${stashKey}"`);
+    
+    // 2. See if the validation function is approving or rejecting it
+    const isValid = isValidStashKey(stashKey);
+    console.log("2. Is the key valid?", isValid);
+
+    if (isValid) {
       const url = `${import.meta.env.VITE_BASE_URL}/api/file/download`;
+      console.log("3. Sending request to URL:", url);
 
       setIsLoading(true);
       setError(null);
@@ -18,34 +27,32 @@ export const useDownload = () => {
       try {
         const res = await axios.get(url, { params: { stashKey } });
         const { downloadUrls } = await res.data;
-        console.log("download", downloadUrls);
+        console.log("4. Download success! Data:", downloadUrls);
 
         setData(downloadUrls);
         setDownloadUrls(downloadUrls);
         setIsLoading(false);
       } catch (error) {
+        console.log("4. Download failed with error:", error);
         if (axios.isAxiosError(error)) {
           if (error.response) {
-            // Server responded with an error
             console.error("Error status:", error.response.status);
-            console.error("Error data:", error.response.data);
             setError(error.response.data.message);
           } else if (error.request) {
-            // Request was made but no response
             console.error("No response received:", error.request);
-            setError("No response received");
+            setError("No response received from backend");
           } else {
-            // Something happened in setting up the request
-            console.error("Error message:", error.message);
             setError(error.message);
           }
         } else {
-          console.error("Unexpected error:", error);
+          setError("Unexpected error");
         }
-
         setIsLoading(false);
       }
+    } else {
+       console.log("-> Request blocked because isValidStashKey returned false.");
     }
   }, []);
+
   return { data, isLoading, error, sendRequest };
 };

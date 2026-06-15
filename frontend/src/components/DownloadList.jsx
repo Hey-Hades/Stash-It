@@ -12,17 +12,19 @@ const DownloadList = () => {
   const [currFileDownloading, setCurrFileDownloading] = useState(null);
   const [progress, setProgress] = useState({});
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false); // 1. Added state for Download All
   const preview = useRef(null);
   const [open, setOpen] = useState(false);
   const { downloadUrls: files } = useSessionContext();
+
   const handlePreview = (file) => {
     if (file.id === currFileDownloading) return null;
     setOpen(true);
     preview.current = { type: file.type, url: file.downloadUrl };
   };
+
   const handleDownload = async (id) => {
     const file = files.find((f) => f.id === id);
-    console.log(file.downloadUrl);
     if (!file) return;
 
     try {
@@ -35,7 +37,7 @@ const DownloadList = () => {
 
       const contentLength = res.headers.get("Content-Length");
       if (!contentLength) {
-        console.warn("No content length headers , cannot track progress");
+        console.warn("No content length headers, cannot track progress");
       } else {
         setIsConnecting(false);
       }
@@ -56,16 +58,12 @@ const DownloadList = () => {
 
         if (total) {
           const percent = Math.round((loaded / total) * 100);
-          console.log(percent);
           setProgress((prev) => ({ ...prev, percent }));
         }
       }
 
       const blob = new Blob(chunks);
-      console.log("blob", blob);
-
       const url = window.URL.createObjectURL(blob);
-      console.log("url", url);
 
       const a = document.createElement("a");
       a.href = url;
@@ -85,20 +83,48 @@ const DownloadList = () => {
       setIsConnecting(false);
     }
   };
-  // const downloadAll = async () => {
-  //   for (const file of files) {
-  //     await handleDownload(file.id);
-  //   }
-  // };
+
+  // 2. Uncommented and updated downloadAll function
+  const downloadAll = async () => {
+    setIsDownloadingAll(true);
+    for (const file of files) {
+      // The await here ensures they download one by one, updating the progress bar for each!
+      await handleDownload(file.id); 
+    }
+    setIsDownloadingAll(false);
+  };
+
   return (
-    <div className="h-100  p-4 border-b border-neutral-900">
-      <ul className="flex flex-col  items-center h-full overflow-auto">
+    <div className="h-100 p-4 border-b border-neutral-900">
+      
+      {/* 3. Added the Download All Button (Only shows if there are multiple files) */}
+      {files.length > 1 && (
+        <div className="flex justify-center w-full mb-4">
+          <div className="flex justify-end w-full lg:w-[70%]">
+            <button
+              type="button"
+              onClick={downloadAll}
+              disabled={isDownloadingAll || currFileDownloading !== null}
+              className="flex items-center gap-2 text-xs sm:text-sm text-neutral-400 bg-neutral-900 border border-neutral-800 px-3 py-2 rounded-md hover:bg-neutral-800 hover:text-neutral-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDownloadingAll ? (
+                <PulseLoader color="#c0c0c0ff" size={5} />
+              ) : (
+                <>
+                  <Download size={16} />
+                  Download All
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <ul className="flex flex-col items-center h-full overflow-auto">
         {files.map((file) => (
           <li
             key={file.id}
-            className="relative w-full lg:w-[70%] flex items-center justify-between text-sm font-mono border-b p-4
-                 border-neutral-900
- "
+            className="relative w-full lg:w-[70%] flex items-center justify-between text-sm font-mono border-b p-4 border-neutral-900"
             onClick={() => handlePreview(file)}
           >
             <div className="min-w-0 w-full">
@@ -120,7 +146,7 @@ const DownloadList = () => {
                     e.stopPropagation();
                     handleDownload(file.id);
                   }}
-                  disabled={currFileDownloading === file.id}
+                  disabled={currFileDownloading !== null} // Disabled while ANY file is downloading
                 >
                   <Download color="#c0c0c0ff" size={20} />
                 </button>
@@ -138,6 +164,7 @@ const DownloadList = () => {
           </li>
         ))}
       </ul>
+      
       {open && (
         <Modal onClose={() => setOpen(false)} preview={true}>
           <RenderPreview preview={preview} setOpen={setOpen} />
