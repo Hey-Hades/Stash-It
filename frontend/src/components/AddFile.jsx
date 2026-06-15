@@ -55,38 +55,52 @@ const AddFile = () => {
     "animate-sonar absolute w-full h-full rounded-full opacity-0 bg-white";
 
   return (
-    <div className="md:absolute md:top-0 md:left-0 relative">
+    <div className="relative md:absolute md:top-0 md:left-0">
       {/* Desktop trigger */}
-      <input
-        type="file"
-        multiple
-        className="hidden"
-        ref={fileInputRef}
-        onChange={handleChange}
-      />
-      <div
-        className="hidden lg:block relative h-20 w-20"
-        onClick={() => setShowMenu((prev) => !prev)}
-      >
-        <div className={`${sonarWave} sonar-delay-1 z-0`}></div>
-        <div className={`${sonarWave} sonar-delay-2 z-0`}></div>
-        <div className={`${sonarWave} sonar-delay-3 z-0`}></div>
+      {/* File Input */}
+<input
+  type="file"
+  multiple
+  className="hidden"
+  ref={fileInputRef}
+  onChange={handleChange}
+/>
 
-        <div className="absolute cursor-pointer inset-0 flex items-center justify-center bg-white text-black rounded-full z-10">
-          <span>
-            <Plus size={25} />
-          </span>
-        </div>
-      </div>
+{/* Tablet + Desktop Trigger */}
+<div
+  className="hidden md:block relative h-20 w-20 cursor-pointer"
+  onClick={() => setShowMenu((prev) => !prev)}
+>
+  <div className={`${sonarWave} sonar-delay-1 z-0`} />
+  <div className={`${sonarWave} sonar-delay-2 z-0`} />
+  <div className={`${sonarWave} sonar-delay-3 z-0`} />
 
-      {/* Mobile trigger */}
-      <button
-        type="button"
-        className="lg:hidden bg-white text-black outline-none w-10 h-10 rounded-lg"
-        onClick={() => setShowMenu((prev) => !prev)}
-      >
-        <span className="text-xl">+</span>
-      </button>
+  <div className="absolute inset-0 flex items-center justify-center bg-white text-black rounded-full z-10">
+    <Plus size={25} />
+  </div>
+</div>
+
+{/* Mobile Trigger */}
+{/* Mobile only */}
+<button
+  type="button"
+  className="
+    md:hidden
+    fixed
+    bottom-40
+    left-1/2
+    -translate-x-1/2
+    bg-white
+    text-black
+    w-14
+    h-14
+    rounded-xl
+    z-50
+  "
+  onClick={() => setShowMenu((prev) => !prev)}
+>
+  <span className="text-2xl">+</span>
+</button>
 
       {showMenu && (
         <UploadMenu

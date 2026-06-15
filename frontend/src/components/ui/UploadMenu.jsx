@@ -11,7 +11,7 @@ const UploadMenu = ({ menuRef, fileInputRef, setShowModal }) => {
       ref={menuRef}
       // 'top-full' places it directly below the button container
       // 'mt-2' adds a small gap so it looks 'connected' but not touching
-      className="absolute z-50 top-full mt-1 left-6"
+      className="absolute z-50 top-full mt-1 left-1/2 -translate-x-1/2"
     >
       <ul className="w-32 bg-neutral-900/90 backdrop-blur-md border border-neutral-700/50 text-white rounded-xl shadow-xl overflow-hidden animate-fadeIn p-1">
         <li
