@@ -3,10 +3,11 @@ const UploadMenu = ({ menuRef, fileInputRef, setShowModal, setShowMenu }) => {
     <div
       ref={menuRef}
       className="
-        fixed
-        bottom-[171px]
+        absolute
+        bottom-full
         left-1/2
         -translate-x-1/2
+        mb-3
         z-50
 
         md:absolute
@@ -15,6 +16,7 @@ const UploadMenu = ({ menuRef, fileInputRef, setShowModal, setShowMenu }) => {
         md:left-1/2
         md:-translate-x-1/2
         md:mt-1
+        md:mb-0
       "
     >
       <ul className="w-40 md:w-32 bg-neutral-900/90 backdrop-blur-md border border-neutral-700/50 text-white rounded-xl shadow-xl overflow-hidden animate-fadeIn p-1">

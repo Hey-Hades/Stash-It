@@ -61,7 +61,7 @@ const Main = () => {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center ">
+    <div className="relative flex h-full flex-col items-center justify-start pb-24 md:justify-center md:pb-0">
       <div className="hidden md:flex flex-shrink-0">
         {sessionInfo.uploadStatus === "idle" && <AddFile />}
       </div>
@@ -117,9 +117,6 @@ const Main = () => {
               </button>
             )}
           </div>
-          <div className="md:hidden relative flex flex-1 justify-end">
-            {sessionInfo.uploadStatus === "idle" && <AddFile />}
-          </div>
         </div>
 
         {sessionInfo.newRequest && (
@@ -127,6 +124,9 @@ const Main = () => {
             <NewRequest />
           </>
         )}
+      </div>
+      <div className="md:hidden absolute bottom-8 left-1/2 -translate-x-1/2">
+        {sessionInfo.uploadStatus === "idle" && <AddFile />}
       </div>
     </div>
   );

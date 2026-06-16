@@ -83,10 +83,7 @@ const AddFile = () => {
       <div
         className="
           md:hidden
-          fixed
-          bottom-[120px]
-          left-1/2
-          -translate-x-1/2
+          relative
           h-14
           w-14
           cursor-pointer

@@ -10,7 +10,7 @@ const Nav = () => {
       transform -translate-x-1/2 origin-center transition-all duration-300 ease-in-out `;
   return (
     <div className="font-monoton flex items-center p-4">
-      <div className="text-xl sm:text-2xl flex-1">Stash It ..</div>
+      <div className="text-xl sm:text-2xl flex-1">Stash-It ..</div>
 
       {/* Center Nav */}
       <div className="flex-1 flex justify-center">
