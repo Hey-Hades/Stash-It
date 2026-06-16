@@ -5,6 +5,7 @@ import { generateMetaData } from "../utils/utils";
 import { useKey } from "../contexts/KeyContext";
 import { useSessionContext } from "../contexts/SessionContext";
 import toast from "react-hot-toast";
+import { apiUrl } from "../utils/api";
 export const useUpload = () => {
   const { files, updateState, expiry, abortController, filesRef } = useFile();
   const { addKey } = useKey();
@@ -31,7 +32,7 @@ export const useUpload = () => {
 
       const metadata = generateMetaData(files);
 
-      const url = `${import.meta.env.VITE_BASE_URL}/api/file/upload`;
+      const url = apiUrl("/api/file/upload");
 
       const res = await axios.post(url, {
         files: metadata,

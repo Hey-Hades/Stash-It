@@ -1,8 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { apiUrl } from "../utils/api";
 
 export const useRetry = () => {
-  const url = `${import.meta.env.VITE_BASE_URL}/api/file/retry`;
+  const url = apiUrl("/api/file/retry");
   const [isConnecting, setIsConnecting] = useState(false);
   const retryRequest = async (filePaths) => {
     try {

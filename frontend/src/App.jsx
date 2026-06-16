@@ -11,9 +11,9 @@ function App() {
     <>
       <Toaster position="bottom-right" reverseOrder={false} />
 
-      <div className="h-screen w-screen px-1 sm:px-10 md:px-20 pt-5  ">
+      <div className="flex h-dvh w-screen flex-col overflow-hidden px-2 pt-5 sm:px-10 md:px-20">
         <Nav />
-        <main className="h-[85%]  bg-neutral-950 font-mono p-4 md:p-10 rounded-2xl text-neutral-200">
+        <main className="min-h-0 flex-1 overflow-y-auto bg-neutral-950 font-mono p-4 rounded-2xl text-neutral-200 md:p-10">
           {sessionInfo.page === "main" ? <Main /> : <Download />}
         </main>
       </div>

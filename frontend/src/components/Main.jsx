@@ -61,14 +61,14 @@ const Main = () => {
   };
 
   return (
-    <div className="relative flex h-full flex-col items-center justify-start pb-24 md:justify-center md:pb-0">
-      <div className="hidden md:flex flex-shrink-0">
+    <div className="relative flex h-full min-h-0 flex-col items-center justify-start pb-28 md:justify-center md:pb-0">
+      <div className="hidden flex-shrink-0 md:flex">
         {sessionInfo.uploadStatus === "idle" && <AddFile />}
       </div>
-      <div className="w-full md:w-[80%]">
+      <div className="w-full min-w-0 md:w-[80%]">
         <div>
           <FileList retry={retry} />
-          <div className="flex justify-between mt-2">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
             <ExpiresIn value={expiry} onChange={setExpiry} />
             <div>
               {sessionInfo.newRequest && failedFiles.length > 0 && (
@@ -125,7 +125,7 @@ const Main = () => {
           </>
         )}
       </div>
-      <div className="md:hidden absolute bottom-8 left-1/2 -translate-x-1/2">
+      <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 md:hidden">
         {sessionInfo.uploadStatus === "idle" && <AddFile />}
       </div>
     </div>

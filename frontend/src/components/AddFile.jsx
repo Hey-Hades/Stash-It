@@ -84,8 +84,8 @@ const AddFile = () => {
         className="
           md:hidden
           relative
-          h-14
-          w-14
+          h-16
+          w-16
           cursor-pointer
           z-50
         "

@@ -60,7 +60,7 @@ const FileList = ({ retry }) => {
   return (
     <div
       {...getRootProps()}
-      className={`p-4 h-50 sm:h-60 overflow-auto border 
+      className={`h-[min(48dvh,22rem)] overflow-auto border p-4 sm:h-60
     ${
       isDragActive && sessionInfo.uploadStatus === "idle"
         ? "border-dashed border-[#5c5c5cff] bg-gray-900/40 "

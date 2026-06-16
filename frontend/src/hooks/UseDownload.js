@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import axios from "axios";
 import { isValidStashKey } from "../utils/utils";
 import { useSessionContext } from "../contexts/SessionContext";
+import { apiUrl } from "../utils/api";
 
 export const useDownload = () => {
   const [data, setData] = useState([]);
@@ -18,7 +19,7 @@ export const useDownload = () => {
     console.log("2. Is the key valid?", isValid);
 
     if (isValid) {
-      const url = `${import.meta.env.VITE_BASE_URL}/api/file/download`;
+      const url = apiUrl("/api/file/download");
       console.log("3. Sending request to URL:", url);
 
       setIsLoading(true);
