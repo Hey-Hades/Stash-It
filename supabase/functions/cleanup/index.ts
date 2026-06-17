@@ -6,67 +6,68 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
-Deno.serve(async (req) => {
+Deno.serve(async () => {
   try {
-    // 1. Check for authorization header
-    const authHeader = req.headers.get("x-service-key");
-    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    // Auth block completely removed.
+
+    // 1. Time calculations
+    const now = new Date();
+    const fifteenMinsAgo = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+    const thirtyMinsAgo = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+
+    // 2. Fetch strictly expired rows ONLY
+    const { data: stashRows, error } = await supabase
+      .from("stash")
+      .select("*")
+      .or(`and(expiry.eq.once,created_at.lte.${fifteenMinsAgo}),and(expiry.eq.30m,created_at.lte.${thirtyMinsAgo}),and(expiry.eq.1h,created_at.lte.${oneHourAgo})`);
+
+    if (error) throw error;
     
-    if (!authHeader || authHeader !== SERVICE_ROLE_KEY) {
-      return new Response(JSON.stringify({ code: 401, message: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
+    if (!stashRows || stashRows.length === 0) {
+      return new Response(JSON.stringify({ status: "No rows found" }), { 
+        status: 200,
+        headers: { "Content-Type": "application/json" }
       });
     }
 
-    const now = new Date();
-
-    // 2. Get all rows that might be expired
-    const { data: stashRows, error } = await supabase.from("stash").select("*");
-    if (error) throw error;
-    if (!stashRows || stashRows.length === 0)
-      return new Response(JSON.stringify({ status: "No rows found" }), { status: 200 });
-
+    // 3. Two-Phase Deletion Loop
     for (const row of stashRows) {
-      const createdAt = new Date(row.created_at);
-      let expired = false;
+      // Phase A: Storage Deletion
+      if (row.files && Array.isArray(row.files)) {
+        const filePaths = row.files
+          .map((f: any) => f.file_path)
+          .filter(Boolean);
 
-      // Handle 'once' keys
-      if (row.expiry === "once" && now.getTime() - createdAt.getTime() > 15 * 60 * 1000) {
-        expired = true;
-      }
+        console.log("Deleting paths:", filePaths);
 
-      // Handle 30m and 1h expiries
-      if (row.expiry === "30m" && now.getTime() - createdAt.getTime() > 30 * 60 * 1000) {
-        expired = true;
-      }
-      if (row.expiry === "1h" && now.getTime() - createdAt.getTime() > 60 * 60 * 1000) {
-        expired = true;
-      }
-
-      if (expired) {
-        // Delete files from Supabase Storage
-        if (row.files && Array.isArray(row.files)) {
-          const filePaths = row.files.map((f: any) => f.file_path).filter(Boolean);
-          if (filePaths.length > 0) {
-            const { error: storageError } = await supabase.storage
-              .from("stash")
-              .remove(filePaths);
-            if (storageError) console.error("Storage delete error:", storageError.message);
+        if (filePaths.length > 0) {
+          const { error: storageError } = await supabase.storage
+            .from("stash")
+            .remove(filePaths);
+            
+          if (storageError) {
+            console.error(`Storage delete error for ${row.stash_key}:`, storageError.message);
           }
         }
+      }
 
-        // Delete the row from the table
-        const { error: tableError } = await supabase.from("stash").delete().eq("id", row.id);
-        if (tableError) console.error("Table delete error:", tableError.message);
+      // Phase B: Database Row Deletion
+      const { error: tableError } = await supabase.from("stash").delete().eq("id", row.id);
+      if (tableError) {
+        console.error(`Table delete error for ID ${row.id}:`, tableError.message);
       }
     }
 
-    return new Response(JSON.stringify({ status: "Cleanup done" }), {
+    return new Response(JSON.stringify({ status: "Cleanup done", deletedCount: stashRows.length }), {
+      status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 });
+    return new Response(JSON.stringify({ error: (err as Error).message }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 });
