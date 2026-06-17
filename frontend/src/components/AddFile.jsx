@@ -31,7 +31,6 @@ const AddFile = () => {
 
   const handleChange = (e) => {
     const fileArr = Array.from(e.target.files);
-
     for (const file of fileArr) {
       const updatedFile = generateFileObj(file);
       addFile(updatedFile);

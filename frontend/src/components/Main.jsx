@@ -7,6 +7,7 @@ import ExpiresIn from "./ExpiresIn";
 import { useRetry } from "../hooks/UseRetry";
 import { useSessionContext } from "../contexts/SessionContext";
 import FileList from "./FileList";
+
 const Main = () => {
   const {
     files,
@@ -34,7 +35,6 @@ const Main = () => {
   };
 
   const updateInvalidUrls = async (files) => {
-    //only get retry url of ones which are partially used
     const usedLinkFiles = files.filter((f) => f.state.progress > 0);
     const pathArr = usedLinkFiles.map((f) => ({
       path: f.state.path,
@@ -45,19 +45,15 @@ const Main = () => {
       updateState({ uploadUrl: url.uploadUrl }, url.id);
     }
   };
-  const retry = async (files) => {
-    console.log("retrying");
-    let updatedFiles = files.filter((f) => f.state.status !== "success");
-    console.log(updatedFiles);
-    //expetcs an array
 
+  const retry = async (files) => {
+    let updatedFiles = files.filter((f) => f.state.status !== "success");
     const retryUrls = [];
     await updateInvalidUrls(updatedFiles);
     for (const file of updatedFiles) {
       retryUrls.push({ uploadUrl: file.state.uploadUrl, id: file.fileInfo.id });
     }
     await uploadAllFiles(retryUrls);
-    console.log("done");
   };
 
   return (
@@ -68,14 +64,13 @@ const Main = () => {
       <div className="w-full min-w-0 md:w-[80%]">
         <div>
           <FileList retry={retry} />
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex justify-between mt-2">
             <ExpiresIn value={expiry} onChange={setExpiry} />
             <div>
               {sessionInfo.newRequest && failedFiles.length > 0 && (
                 <button
                   type="button"
-                  className="py-2 px-6 bg-neutral-900 text-xs sm:text-sm text-white rounded-md overflow-hidden hover:bg-white hover:text-black
-                   transition-all duration-300"
+                  className="py-2 px-6 bg-neutral-900 text-xs sm:text-sm text-white rounded-md overflow-hidden hover:bg-white hover:text-black transition-all duration-300"
                   onClick={() => retry(failedFiles)}
                   disabled={isConnecting || uploadState.uploading}
                 >
@@ -95,13 +90,11 @@ const Main = () => {
             {files.length > 0 && !sessionInfo.newRequest && (
               <button
                 type="button"
-                className={`relative py-2 px-6 bg-neutral-900 text-white rounded-md overflow-hidden 
-                   transition-all duration-300 ${
-                     requestState.status === "idle"
-                       ? "hover:bg-white hover:text-black"
-                       : ""
-                   }
-                   border border-black`}
+                className={`relative py-2 px-6 bg-neutral-900 text-white rounded-md overflow-hidden transition-all duration-300 ${
+                  requestState.status === "idle"
+                    ? "hover:bg-white hover:text-black"
+                    : ""
+                } border border-black`}
                 disabled={
                   requestState.status !== "idle" || uploadState.uploading
                 }
@@ -125,6 +118,8 @@ const Main = () => {
           </>
         )}
       </div>
+      
+      {/* Your mobile floating action button */}
       <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 md:hidden">
         {sessionInfo.uploadStatus === "idle" && <AddFile />}
       </div>

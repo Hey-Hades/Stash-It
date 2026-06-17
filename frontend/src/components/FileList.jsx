@@ -10,6 +10,7 @@ import { RenderPreview } from "./RenderPreview";
 import { FileIcon } from "./ui/FileIcon";
 import TextEditModal from "./ui/TextEditModal";
 import { isDocx } from "../utils/utils";
+
 const FileList = ({ retry }) => {
   const { files, addFile, removeFile, clearFiles, abortController } = useFile();
   const { sessionInfo } = useSessionContext();
@@ -53,14 +54,16 @@ const FileList = ({ retry }) => {
       setOpen(true);
     }
   };
+
   const endRef = useRef(null);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [files]);
+
   return (
     <div
       {...getRootProps()}
-      className={`h-[min(48dvh,22rem)] overflow-auto border p-4 sm:h-60
+      className={`p-4 h-50 sm:h-60 overflow-auto border 
     ${
       isDragActive && sessionInfo.uploadStatus === "idle"
         ? "border-dashed border-[#5c5c5cff] bg-gray-900/40 "
