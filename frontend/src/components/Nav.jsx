@@ -11,7 +11,7 @@ const Nav = () => {
   return (
     <div className="font-monoton flex items-center gap-3 px-2 py-4 sm:px-4">
       <div className="min-w-0 flex-1 text-xl sm:text-2xl">
-        <span className="block truncate">Stash It ..</span>
+        <span className="block truncate">Stash-It..</span>
       </div>
 
       {/* Center Nav */}
