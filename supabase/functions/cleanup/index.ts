@@ -1,17 +1,17 @@
-// supabase/functions/cleanup/index.ts
 // @ts-ignore
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const supabase = createClient(
-  Deno.env.get("PROJECT_URL")!,
-  Deno.env.get("SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
 Deno.serve(async (req) => {
   try {
     // 1. Check for authorization header
     const authHeader = req.headers.get("x-service-key");
-    const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY");
+    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
     if (!authHeader || authHeader !== SERVICE_ROLE_KEY) {
       return new Response(JSON.stringify({ code: 401, message: "Unauthorized" }), {
         status: 401,
