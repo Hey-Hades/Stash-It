@@ -15,6 +15,9 @@ export const SessionProvider = ({ children }) => {
     error: null,
   });
   const [downloadUrls, setDownloadUrls] = useState([]);
+  
+  // ADDED: Track which transfer mode the user has selected
+  const [transferMode, setTransferMode] = useState("cloud"); // "cloud" | "p2p"
 
   return (
     <SessionContext.Provider
@@ -25,6 +28,9 @@ export const SessionProvider = ({ children }) => {
         setDownloadUrls,
         requestState,
         setRequestState,
+        // ADDED: Pass the new state and setter to the context
+        transferMode,
+        setTransferMode,
       }}
     >
       {children}

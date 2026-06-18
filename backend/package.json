@@ -19,6 +19,7 @@
     "express": "^5.1.0",
     "express-async-handler": "^1.2.0",
     "nodemon": "^3.1.10",
+    "socket.io": "^4.8.3",
     "unique-names-generator": "^4.7.1"
   }
 }

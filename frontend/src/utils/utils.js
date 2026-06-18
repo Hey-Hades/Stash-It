@@ -8,11 +8,17 @@ export const formatBytes = (bytes) => {
 };
 
 export const isValidStashKey = (stashKey) => {
-  if (stashKey.length < 11) return false; // minimum possisible size of a stash key is 12
-  const keyComponents = stashKey.split("-"); //it has minimum of 3 components can be 4 as well
+  // --- P2P KEY BYPASS ---
+  if (stashKey.startsWith("p2p-")) {
+    return stashKey.length > 5; // Validates if it's at least 'p2p-X'
+  }
+  // ----------------------
+
+  if (stashKey.length < 11) return false; 
+  const keyComponents = stashKey.split("-"); 
   const len = keyComponents.length;
   if (len < 3) return false;
-  if (keyComponents[len - 1].length !== 6) return false; //last component of key is always 6 digits long
+  if (keyComponents[len - 1].length !== 6) return false; 
 
   return true;
 };

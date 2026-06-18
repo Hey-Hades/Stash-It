@@ -13,7 +13,10 @@ import { isDocx } from "../utils/utils";
 
 const FileList = ({ retry }) => {
   const { files, addFile, removeFile, clearFiles, abortController } = useFile();
-  const { sessionInfo } = useSessionContext();
+  
+  // Grab transferMode from the session context
+  const { sessionInfo, transferMode } = useSessionContext();
+  
   const [open, setOpen] = useState(false);
   const preview = useRef(null);
   const [openTextEditor, setOpenTextEditor] = useState(false);
@@ -24,8 +27,18 @@ const FileList = ({ retry }) => {
         toast.error("Files can only be added before upload");
         return;
       }
+      
       const fileList = Array.from(droppedFiles);
+      
       for (const f of fileList) {
+        // --- THE FIX: Block files > 50MB ONLY in Cloud mode ---
+        // 50 MB = 50 * 1024 * 1024 bytes
+        if (transferMode === "cloud" && f.size > 50 * 1024 * 1024) {
+          toast.error(`"${f.name}" is too large! Cloud Stash limit is 50MB.`);
+          continue; // Skip adding this specific file, but process the rest
+        }
+        // ------------------------------------------------------
+
         const file = generateFileObj(f);
         addFile(file);
       }
@@ -74,12 +87,19 @@ const FileList = ({ retry }) => {
       <input {...getInputProps()} />
       <ul className="space-y-2 ">
         {files.length === 0 && (
-          <li className="text-xs sm:text-sm text-neutral-500">
-            <p>Press + to add files or</p>
-            <p className="hidden sm:block">Drag and Drop files</p>
-            <p>Files must not exceed 50 MB</p>
-          </li>
-        )}
+  <li className="text-xs sm:text-sm text-neutral-500">
+    <p>Press + to add files</p>
+    <p className="hidden sm:block">Drag and Drop files</p>
+
+    {transferMode === "cloud" ? (
+      <p>Files must not exceed 50 MB</p>
+    ) : (
+      <p className="text-green-400">
+       No file size limit • Speed depends on your network
+      </p>
+    )}
+  </li>
+)}
 
         {files.map((file) => (
           <li
@@ -93,12 +113,14 @@ const FileList = ({ retry }) => {
                 {file.fileInfo.name}
               </p>
               <p
-                className={`flex gap-2 text-xs ${
-                  file.fileInfo.formattedSize.valid
-                    ? "text-neutral-500"
-                    : "text-red-400"
-                }`}
-              >
+  className={`flex gap-2 text-xs ${
+    transferMode === "p2p"
+      ? "text-green-400"
+      : file.fileInfo.formattedSize.valid
+      ? "text-neutral-500"
+      : "text-red-400"
+  }`}
+>
                 {file.fileInfo.formattedSize.size}
                 <span>
                   <FileIcon type={file.fileInfo.type} />
@@ -121,7 +143,7 @@ const FileList = ({ retry }) => {
                   >
                     {file.state.status !== "error" ? (
                       file.state.status
-                    ) : (
+                    ) : transferMode === "cloud" ? (
                       <button
                         type="button"
                         onClick={(e) => {
@@ -131,6 +153,8 @@ const FileList = ({ retry }) => {
                       >
                         Retry
                       </button>
+                    ) : (
+                      <span>Failed</span>
                     )}
                   </span>
                 ) : (
