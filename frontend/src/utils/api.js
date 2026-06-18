@@ -1,5 +1,5 @@
 const envBaseUrl = import.meta.env.VITE_BASE_URL?.replace(/\/+$/, "");
-const productionFallback = "https://stash-it-production-d039.up.railway.app";
+const productionFallback = "https://stash-it-ka3e.onrender.com";
 const localFallback =
   typeof window !== "undefined" &&
   ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
