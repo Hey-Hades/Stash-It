@@ -6,6 +6,7 @@ import { FileProvider } from "./contexts/FileContext.jsx";
 import NetworkProvider from "./contexts/NetworkContext.jsx";
 import { SessionProvider } from "./contexts/SessionContext.jsx";
 import { KeyProvider } from "./contexts/KeyContext.jsx";
+import { Analytics } from "@vercel/analytics/react";
 
 // 1. IMPORT THE P2P PROVIDER HERE
 import { P2PProvider } from "./contexts/P2PContext.jsx";
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")).render(
             {/* 2. WRAP THE APP WITH P2P PROVIDER HERE */}
             <P2PProvider>
               <App />
+              <Analytics />
             </P2PProvider>
           </KeyProvider>
         </FileProvider>

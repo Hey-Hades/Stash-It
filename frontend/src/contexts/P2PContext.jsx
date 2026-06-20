@@ -29,8 +29,31 @@ export const P2PProvider = ({ children }) => {
 
   const createPeerConnection = (stashKey) => {
     const peer = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }], 
-    });
+      iceServers: [{ 
+        urls: "stun:stun.relay.metered.ca:80",
+      },
+      {
+        urls: "turn:global.relay.metered.ca:80",
+        username: "d4cbfb38aef88df98b0b6c55",
+        credential: "E/sEWCIIuwFHe6zn",
+      },
+      {
+        urls: "turn:global.relay.metered.ca:80?transport=tcp",
+        username: "d4cbfb38aef88df98b0b6c55",
+        credential: "E/sEWCIIuwFHe6zn",
+      },
+      {
+        urls: "turn:global.relay.metered.ca:443",
+        username: "d4cbfb38aef88df98b0b6c55",
+        credential: "E/sEWCIIuwFHe6zn",
+      },
+      {
+        urls: "turns:global.relay.metered.ca:443?transport=tcp",
+        username: "d4cbfb38aef88df98b0b6c55",
+        credential: "E/sEWCIIuwFHe6zn",
+      },
+  ],
+});
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
