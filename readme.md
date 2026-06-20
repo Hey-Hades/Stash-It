@@ -58,11 +58,14 @@ npm run dev
 ## 📸 Screenshots
 **Laptop Display**
 
-<img width="2880" height="1620" alt="image" src="https://github.com/user-attachments/assets/1080e085-583a-4ea3-89dc-78cb1ef2ba2d" />
+<img width="2880" height="1620" alt="Screenshot (133)" src="https://github.com/user-attachments/assets/d0528aa2-b806-4fc8-a778-cfa193037a27" />
+
+
 
 **Mobile Display**
 
-<img width="212" height="457" alt="WhatsApp Image 2026-06-15 at 15 50 37" src="https://github.com/user-attachments/assets/3b5959c6-f518-4fcf-8f89-9def500b524d" />
+
+<img width="212" height="457" alt="Screenshot_2026_0620_201439" src="https://github.com/user-attachments/assets/14f5bbca-fe27-4c1f-a5cf-1c3a6cef0917" />
 
 
 
