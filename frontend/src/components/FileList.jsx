@@ -95,7 +95,8 @@ const FileList = ({ retry }) => {
       <p>Files must not exceed 50 MB</p>
     ) : (
       <p className="text-green-400">
-       No file size limit • Speed depends on your network
+       • No file size limit <br />
+       • Speed depends on your network
       </p>
     )}
   </li>

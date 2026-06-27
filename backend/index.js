@@ -25,7 +25,22 @@ const isAllowedOrigin = (origin) => {
 
   try {
     const { hostname } = new URL(origin);
-    return hostname.endsWith(".vercel.app");
+    
+    // Allow Vercel production frontend
+    if (hostname.endsWith(".vercel.app")) return true;
+
+    // Allow private LAN subnets for local testing across devices
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.startsWith("192.168.") ||
+      hostname.startsWith("10.") ||
+      hostname.startsWith("172.")
+    ) {
+      return true;
+    }
+
+    return false;
   } catch {
     return false;
   }
@@ -66,25 +81,34 @@ app.use("/api/file", fileRoutes);
 
 // --- P2P SIGNALING SERVER LOGIC ---
 io.on("connection", (socket) => {
+  console.log("Connected:", socket.id, socket.handshake.headers.origin);
+
   socket.on("join-room", (stashKey) => {
-    // 1. Check how many people are currently in the room
+    // This will log exactly who is trying to join which room
+    console.log("JOIN ROOM:", stashKey, socket.id);
+
     const room = io.sockets.adapter.rooms.get(stashKey);
     const numClients = room ? room.size : 0;
 
-    // 2. Enforce the 1-to-1 limit (Max 2 clients per room)
     if (numClients >= 2) {
       socket.emit("room-full");
       console.log(`Socket ${socket.id} rejected. Room ${stashKey} is full.`);
       return; 
     }
 
-    // 3. Allow them in if the room is open
     socket.join(stashKey);
     socket.to(stashKey).emit("peer-joined");
   });
 
   socket.on("signal", (data) => {
+    // This will track the WebRTC handshake (offer, answer, candidate)
+    console.log("SIGNAL:", data.signal.type);
+
     socket.to(data.stashKey).emit("signal", data.signal);
+  });
+  
+  socket.on("disconnect", () => {
+    console.log("Disconnected:", socket.id);
   });
 });
 // ----------------------------------

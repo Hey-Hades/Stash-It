@@ -3,8 +3,6 @@ import DownloadList from "./DownloadList";
 import { useDownload } from "../hooks/UseDownload";
 import { useDebounce } from "../hooks/UseDebounce";
 import { useSessionContext } from "../contexts/SessionContext";
-
-// IMPORTANT: Import useP2P from the new Context
 import { useP2P } from "../contexts/P2PContext"; 
 
 const Download = () => {
@@ -13,8 +11,16 @@ const Download = () => {
   const debouncedKey = useDebounce(stashKey, 1000);
   const { downloadUrls } = useSessionContext();
 
-  // Initialize P2P Receiver State and destructure cancelTransfer
-  const { joinSession, p2pStatus, progress, cleanupP2P, cancelTransfer } = useP2P();
+  const {
+    joinSession,
+    p2pStatus,
+    progress,
+    speed,
+    eta,
+    fileMetadata, // <-- NEW: Grab metadata from context
+    cleanupP2P,
+    cancelTransfer,
+  } = useP2P();
 
   const handleInputKey = (event) => {
     setStashKey(event.target.value.trim());
@@ -23,20 +29,52 @@ const Download = () => {
   useEffect(() => {
     if (!debouncedKey) return;
 
-    if (debouncedKey.startsWith("p2p-")) {
-      // Direct Link logic
-      joinSession(debouncedKey);
+    if (debouncedKey.toLowerCase().startsWith("p2p-")) {
+      const isValidP2PKey = /^p2p-[A-Z0-9]{6}$/i.test(debouncedKey);
+      
+      if (isValidP2PKey) {
+        const normalizedKey = "p2p-" + debouncedKey.slice(4).toUpperCase();
+        joinSession(normalizedKey);
+      }
     } else {
-      // Cloud Stash logic: clear out any lingering P2P state if they switch to cloud
       cleanupP2P(); 
       sendRequest(debouncedKey);
     }
-    
-    // Cleanup function omitted intentionally to allow background transfer during tab switching
   }, [debouncedKey, sendRequest, joinSession, cleanupP2P]);
 
-  // Checks if a transfer is actively running in the background, keeping the UI visible!
-  const isP2P = debouncedKey.startsWith("p2p-") || p2pStatus !== "idle";
+  useEffect(() => {
+    if (p2pStatus === "complete") {
+      setStashKey("");
+    }
+  }, [p2pStatus]);
+
+  const isP2P = debouncedKey.toLowerCase().startsWith("p2p-") || p2pStatus !== "idle";
+
+  const formatSpeed = (bytesPerSec) => {
+    if (!bytesPerSec) return "0 B/s";
+    if (bytesPerSec < 1024) return `${bytesPerSec.toFixed(0)} B/s`;
+    if (bytesPerSec < 1024 * 1024) return `${(bytesPerSec / 1024).toFixed(1)} KB/s`;
+    return `${(bytesPerSec / (1024 * 1024)).toFixed(2)} MB/s`;
+  };
+
+  const formatEta = (seconds) => {
+    if (!seconds || !isFinite(seconds)) return "Calculating...";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  };
+
+  // --- NEW: Helper to format total file size ---
+  const formatBytes = (bytes) => {
+    if (!bytes || bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
 
   return (
     <div className="w-full">
@@ -44,7 +82,7 @@ const Download = () => {
         <div className="flex items-center justify-center w-full md:w-[50%] ">
           <input
             type="text"
-            placeholder="enter-stash-key"
+            placeholder="enter stash or p2p- key"
             onChange={handleInputKey}
             value={stashKey}
             className="
@@ -69,7 +107,7 @@ const Download = () => {
 
         {!isP2P && (
           <div className="text-sm mb-2">
-            {isLoading && <span className="text-neutral-600">Searching ...</span>}
+            {isLoading && <span className="text-neutral-600">Searching...</span>}
             {error && <span className="text-red-500">{error}</span>}
           </div>
         )}
@@ -79,11 +117,9 @@ const Download = () => {
         <div>{downloadUrls && downloadUrls.length > 0 && <DownloadList />}</div>
       )}
 
-      {/* P2P DIRECT TRANSFER UI */}
       {isP2P && p2pStatus !== "idle" && (
         <div className="mt-8 w-full md:w-[80%] lg:w-[60%] mx-auto p-6 border border-neutral-700 rounded-md bg-neutral-900 text-center text-white shadow-lg">
           
-          {/* Dynamic Header: Turns red on error, green otherwise */}
           <h3 className={`text-lg font-bold mb-4 ${p2pStatus === "error" ? "text-red-400" : "text-green-400"}`}>
             {p2pStatus === "error" ? "Transfer Canceled" : "Direct Transfer Active"}
           </h3>
@@ -94,7 +130,11 @@ const Download = () => {
           
           {p2pStatus === "transferring" && (
             <div className="w-full">
-               <p className="text-green-400 mb-2 font-semibold">Receiving File: {progress}%</p>
+               {/* --- NEW: Dynamic File Name and Size --- */}
+               <p className="text-green-400 mb-2 font-semibold">
+                 {fileMetadata ? `Receiving: ${fileMetadata.name} (${formatBytes(fileMetadata.size)})` : "Receiving File"} - {progress}%
+               </p>
+               
                <div className="w-full bg-neutral-800 h-3 rounded-full overflow-hidden border border-neutral-700">
                  <div 
                     className="bg-green-400 h-full transition-all duration-300 ease-out" 
@@ -102,16 +142,19 @@ const Download = () => {
                  ></div>
                </div>
                
-               {/* --- THE CANCEL BUTTON --- */}
+               <div className="flex justify-between text-xs text-neutral-300 mt-3 px-1 font-mono">
+                 <span>Speed: {formatSpeed(speed)}</span>
+                 <span>ETA: {formatEta(eta)}</span>
+               </div>
+               
                <button 
                  onClick={cancelTransfer}
                  className="mt-4 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-md transition duration-200"
                >
                  Cancel Download
                </button>
-               {/* ------------------------- */}
 
-               <p className="text-xs text-neutral-400 mt-4">⚠️ Do not close this tab until the download is complete.</p>
+               <p className="text-xs text-neutral-400 mt-4">⚠️ Refresh and Regret :)</p>
             </div>
           )}
           
@@ -119,19 +162,25 @@ const Download = () => {
             <div className="py-4">
                <p className="text-green-400 font-bold text-xl mb-2">File Received!</p>
                <p className="text-sm text-neutral-400">Your browser has automatically downloaded the file.</p>
+               
+               <button 
+                 onClick={cleanupP2P}
+                 className="mt-4 px-4 py-1.5 border border-neutral-600 hover:bg-neutral-800 text-neutral-300 text-xs font-semibold rounded-md transition duration-200"
+               >
+                 Receive Another File
+               </button>
             </div>
           )}
 
-          {/* --- THE ERROR BLOCK --- */}
           {p2pStatus === "error" && (
             <div className="py-4">
                <p className="text-red-400 font-bold text-xl mb-2">❌ Transfer Canceled</p>
                <p className="text-sm text-neutral-400">
                  The sender disconnected, canceled the transfer, or the link is invalid/in-use.
                </p>
+               
             </div>
           )}
-          {/* --------------------------- */}
           
         </div>
       )}
