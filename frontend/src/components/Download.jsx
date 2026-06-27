@@ -17,7 +17,7 @@ const Download = () => {
     progress,
     speed,
     eta,
-    fileMetadata, // <-- NEW: Grab metadata from context
+    fileMetadata,
     cleanupP2P,
     cancelTransfer,
   } = useP2P();
@@ -67,7 +67,6 @@ const Download = () => {
     return `${s}s`;
   };
 
-  // --- NEW: Helper to format total file size ---
   const formatBytes = (bytes) => {
     if (!bytes || bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -120,9 +119,12 @@ const Download = () => {
       {isP2P && p2pStatus !== "idle" && (
         <div className="mt-8 w-full md:w-[80%] lg:w-[60%] mx-auto p-6 border border-neutral-700 rounded-md bg-neutral-900 text-center text-white shadow-lg">
           
-          <h3 className={`text-lg font-bold mb-4 ${p2pStatus === "error" ? "text-red-400" : "text-green-400"}`}>
-            {p2pStatus === "error" ? "Transfer Canceled" : "Direct Transfer Active"}
-          </h3>
+          {/* Header only shows when active */}
+          {(p2pStatus === "connecting" || p2pStatus === "transferring") && (
+            <h3 className="text-lg font-bold mb-4 text-green-400">
+              Direct Transfer Active
+            </h3>
+          )}
           
           {p2pStatus === "connecting" && (
             <p className="text-blue-400 animate-pulse text-sm">Connecting securely to sender...</p>
@@ -130,15 +132,14 @@ const Download = () => {
           
           {p2pStatus === "transferring" && (
             <div className="w-full">
-               {/* --- NEW: Dynamic File Name and Size --- */}
                <div className="text-green-400 mb-3 w-full flex flex-col items-center">
-  <span className="truncate w-full block font-semibold px-2" title={fileMetadata?.name}>
-    {fileMetadata ? `Receiving: ${fileMetadata.name}` : "Receiving File"}
-  </span>
-  <span className="text-sm mt-1 font-medium text-green-300">
-    {fileMetadata ? `${formatBytes(fileMetadata.size)} • ` : ""}{progress}%
-  </span>
-</div>
+                 <span className="truncate w-full block font-semibold px-2" title={fileMetadata?.name}>
+                   {fileMetadata ? `Receiving: ${fileMetadata.name}` : "Receiving File"}
+                 </span>
+                 <span className="text-sm mt-1 font-medium text-green-300">
+                   {fileMetadata ? `${formatBytes(fileMetadata.size)} • ` : ""}{progress}%
+                 </span>
+               </div>
                
                <div className="w-full bg-neutral-800 h-3 rounded-full overflow-hidden border border-neutral-700">
                  <div 
@@ -164,26 +165,32 @@ const Download = () => {
           )}
           
           {p2pStatus === "complete" && (
-            <div className="py-4">
-               <p className="text-green-400 font-bold text-xl mb-2">File Received!</p>
-               <p className="text-sm text-neutral-400">Your browser has automatically downloaded the file.</p>
+            <div className="py-2">
+               <div className="text-4xl mb-2">🎉</div>
+               <p className="text-green-400 font-bold text-lg mb-1">File Received!</p>
+               <p className="text-xs text-neutral-400 mb-4">Your browser has automatically downloaded the file.</p>
                
                <button 
                  onClick={cleanupP2P}
-                 className="mt-4 px-4 py-1.5 border border-neutral-600 hover:bg-neutral-800 text-neutral-300 text-xs font-semibold rounded-md transition duration-200"
+                 className="px-4 py-1.5 border border-neutral-600 hover:bg-neutral-800 text-neutral-300 text-xs font-semibold rounded-md transition duration-200"
                >
                  Receive Another File
                </button>
             </div>
           )}
 
+          {/* Sleeker Error State (No Button) */}
           {p2pStatus === "error" && (
-            <div className="py-4">
-               <p className="text-red-400 font-bold text-xl mb-2">❌ Transfer Canceled</p>
-               <p className="text-sm text-neutral-400">
-                 The sender disconnected, canceled the transfer, or the link is invalid/in-use.
+            <div className="py-2 flex flex-col items-center">
+               <div className="bg-red-500/10 p-3 rounded-full mb-3">
+                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                 </svg>
+               </div>
+               <p className="text-red-400 font-medium text-lg mb-1">Transfer Failed</p>
+               <p className="text-xs text-neutral-400 max-w-[250px] mx-auto">
+                 The sender disconnected, canceled the transfer, or the link is invalid.
                </p>
-               
             </div>
           )}
           
