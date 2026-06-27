@@ -131,9 +131,14 @@ const Download = () => {
           {p2pStatus === "transferring" && (
             <div className="w-full">
                {/* --- NEW: Dynamic File Name and Size --- */}
-               <p className="text-green-400 mb-2 font-semibold">
-                 {fileMetadata ? `Receiving: ${fileMetadata.name} (${formatBytes(fileMetadata.size)})` : "Receiving File"} - {progress}%
-               </p>
+               <div className="text-green-400 mb-3 w-full flex flex-col items-center">
+  <span className="truncate w-full block font-semibold px-2" title={fileMetadata?.name}>
+    {fileMetadata ? `Receiving: ${fileMetadata.name}` : "Receiving File"}
+  </span>
+  <span className="text-sm mt-1 font-medium text-green-300">
+    {fileMetadata ? `${formatBytes(fileMetadata.size)} • ` : ""}{progress}%
+  </span>
+</div>
                
                <div className="w-full bg-neutral-800 h-3 rounded-full overflow-hidden border border-neutral-700">
                  <div 
