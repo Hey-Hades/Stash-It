@@ -20,6 +20,7 @@ const Download = () => {
     fileMetadata,
     cleanupP2P,
     cancelTransfer,
+    role, // <-- NEW: Grab role from context
   } = useP2P();
 
   const handleInputKey = (event) => {
@@ -48,7 +49,8 @@ const Download = () => {
     }
   }, [p2pStatus]);
 
-  const isP2P = debouncedKey.toLowerCase().startsWith("p2p-") || p2pStatus !== "idle";
+  // --- NEW: Only show P2P UI if the role is 'receiver' ---
+  const isP2P = debouncedKey.toLowerCase().startsWith("p2p-") || (p2pStatus !== "idle" && role === "receiver");
 
   const formatSpeed = (bytesPerSec) => {
     if (!bytesPerSec) return "0 B/s";

@@ -35,6 +35,9 @@ const AddFile = () => {
       const updatedFile = generateFileObj(file);
       addFile(updatedFile);
     }
+    // --- THIS FIXES THE RETRY GLITCH ---
+    // Clears the input so you can select the exact same file again if a transfer fails
+    e.target.value = null;
   };
 
   const handleSave = () => {

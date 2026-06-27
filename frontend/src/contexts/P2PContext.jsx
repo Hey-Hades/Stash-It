@@ -14,6 +14,8 @@ export const P2PProvider = ({ children }) => {
   const [speed, setSpeed] = useState(0);
   const [eta, setEta] = useState(0);
   const [fileMetadata, setFileMetadata] = useState(null); 
+  // --- NEW: Role state to fix UI bleed between upload and download pages ---
+  const [role, setRole] = useState(null); 
   
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -85,6 +87,7 @@ export const P2PProvider = ({ children }) => {
   const startHosting = useCallback((stashKey, filesToSend) => {
     initSocket();
     stashKeyRef.current = stashKey;
+    setRole("sender"); // <-- NEW: Sets role to sender
     setP2pStatus("waiting");
     pendingCandidatesRef.current = [];
 
@@ -231,6 +234,7 @@ export const P2PProvider = ({ children }) => {
   const joinSession = useCallback((stashKey) => {
     initSocket();
     stashKeyRef.current = stashKey;
+    setRole("receiver"); // <-- NEW: Sets role to receiver
     setP2pStatus("connecting");
     pendingCandidatesRef.current = [];
 
@@ -374,6 +378,7 @@ export const P2PProvider = ({ children }) => {
   };
 
   const cleanupP2P = useCallback(() => {
+    // --- UPDATED: Aggressive cleanup to prevent ghost connections ---
     if (channelRef.current) {
       channelRef.current.onopen = null;
       channelRef.current.onmessage = null;
@@ -405,6 +410,7 @@ export const P2PProvider = ({ children }) => {
     setSpeed(0); 
     setEta(0);   
     setFileMetadata(null); 
+    setRole(null); // <-- NEW: Reset role to fix UI bleed
   }, []);
 
   const cancelTransfer = useCallback(() => {
@@ -424,6 +430,7 @@ export const P2PProvider = ({ children }) => {
       speed,      
       eta,
       fileMetadata,
+      role, // <-- NEW: Export role for UI checks
       cleanupP2P, 
       cancelTransfer 
     }}>

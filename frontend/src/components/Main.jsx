@@ -10,7 +10,7 @@ import FileList from "./FileList";
 
 // Import Key context
 import { useKey } from "../contexts/KeyContext";
-// FIX: Pull useP2P from the global Context wrapper to allow tab switching!
+// Pull useP2P from the global Context wrapper
 import { useP2P } from "../contexts/P2PContext"; 
 
 const Main = () => {
@@ -31,13 +31,14 @@ const Main = () => {
   
   // Initialize P2P and Key hooks from Context
   const { addKey } = useKey();
-  const { startHosting, p2pStatus, progress, cancelTransfer } = useP2P();
+  const { startHosting, p2pStatus, progress, cancelTransfer, cleanupP2P } = useP2P();
+  
   const isCloudSizeExceeded =
-  transferMode === "cloud" &&
-  files.some((file) => file.fileObj.size > 50 * 1024 * 1024);
+    transferMode === "cloud" &&
+    files.some((file) => file.fileObj.size > 50 * 1024 * 1024);
 
   const startUpload = async () => {
-  if (isCloudSizeExceeded) return;
+    if (isCloudSizeExceeded) return;
   
     // --- P2P DIRECT LINK LOGIC ---
     if (transferMode === "p2p") {
@@ -98,7 +99,7 @@ const Main = () => {
   };
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col items-center justify-start pb-28 md:justify-center md:pb-0">
+    <div className="relative flex flex-1 w-full flex-col items-center justify-start pb-28 md:justify-center md:pb-0">
       <div className="hidden flex-shrink-0 md:flex">
         {sessionInfo.uploadStatus === "idle" && <AddFile />}
       </div>
@@ -163,33 +164,33 @@ const Main = () => {
           <div className="flex-1">
             {files.length > 0 && !sessionInfo.newRequest && (
               <button
-  type="button"
-  className={`relative py-2 px-6 rounded-md overflow-hidden transition-all duration-300 w-full sm:w-auto border ${
-    isCloudSizeExceeded
-      ? "bg-red-900/40 border-red-600 text-red-300 cursor-not-allowed"
-      : `bg-neutral-900 text-white border-black ${
-          requestState.status === "idle"
-            ? "hover:bg-white hover:text-black"
-            : ""
-        }`
-  }`}
-  disabled={
-    isCloudSizeExceeded ||
-    ((requestState.status !== "idle" && transferMode === "cloud") ||
-      uploadState.uploading)
-  }
-  onClick={() => startUpload()}
->
-  {isCloudSizeExceeded ? (
-    "Upload files 50MB or less"
-  ) : requestState.status === "idle" || transferMode === "p2p" ? (
-    "Upload"
-  ) : requestState.status === "connecting" ? (
-    <PulseLoader size={5} color="#fff" />
-  ) : (
-    "Connected"
-  )}
-</button>
+                type="button"
+                className={`relative py-2 px-6 rounded-md overflow-hidden transition-all duration-300 w-full sm:w-auto border ${
+                  isCloudSizeExceeded
+                    ? "bg-red-900/40 border-red-600 text-red-300 cursor-not-allowed"
+                    : `bg-neutral-900 text-white border-black ${
+                        requestState.status === "idle"
+                          ? "hover:bg-white hover:text-black"
+                          : ""
+                      }`
+                }`}
+                disabled={
+                  isCloudSizeExceeded ||
+                  ((requestState.status !== "idle" && transferMode === "cloud") ||
+                    uploadState.uploading)
+                }
+                onClick={() => startUpload()}
+              >
+                {isCloudSizeExceeded ? (
+                  "Upload files 50MB or less"
+                ) : requestState.status === "idle" || transferMode === "p2p" ? (
+                  "Upload"
+                ) : requestState.status === "connecting" ? (
+                  <PulseLoader size={5} color="#fff" />
+                ) : (
+                  "Connected"
+                )}
+              </button>
             )}
           </div>
         </div>
@@ -201,7 +202,11 @@ const Main = () => {
             {/* P2P Live Status Indicator below the Key */}
             {transferMode === "p2p" && (
               <div className="mt-6 p-4 border border-neutral-700 rounded-md bg-neutral-900 text-center text-white">
-                <h3 className="text-md sm:text-lg font-bold mb-2">P2P Direct Transfer</h3>
+                
+                {/* Hide Header on Error */}
+                {p2pStatus !== "error" && (
+                  <h3 className="text-md sm:text-lg font-bold mb-2">P2P Direct Transfer</h3>
+                )}
                 
                 {p2pStatus === "waiting" && (
                   <div className="flex flex-col items-center">
@@ -216,7 +221,7 @@ const Main = () => {
                 )}
                 
                 {p2pStatus === "connecting" && (
-                  <p className="text-blue-400 text-sm">Connecting to peer...</p>
+                  <p className="text-blue-400 text-sm animate-pulse">Connecting securely to peer...</p>
                 )}
                 
                 {p2pStatus === "transferring" && (
@@ -235,17 +240,37 @@ const Main = () => {
                 )}
                 
                 {p2pStatus === "complete" && (
-                  <p className="text-green-400 font-bold">Transfer Complete!</p>
-                )}
-
-                {/* --- SENDER ERROR BLOCK --- */}
-                {p2pStatus === "error" && (
-                  <div className="py-2 text-red-400 font-bold">
-                    <p>❌ Transfer Canceled!</p>
-                    <p className="text-xs text-neutral-400 mt-1 font-normal">The connection was closed or dropped.</p>
+                  <div className="py-2">
+                    <div className="text-4xl mb-2">🎉</div>
+                    <p className="text-green-400 font-bold text-lg">Transfer Complete!</p>
                   </div>
                 )}
-                {/* -------------------------- */}
+
+                {/* --- SLEEK SENDER ERROR BLOCK --- */}
+                {p2pStatus === "error" && (
+                  <div className="py-2 flex flex-col items-center text-center">
+                     <div className="bg-red-500/10 p-3 rounded-full mb-3">
+                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                       </svg>
+                     </div>
+                     <p className="text-red-400 font-medium text-lg mb-1">Transfer Failed</p>
+                     <p className="text-xs text-neutral-400 max-w-[250px] mx-auto mb-4">
+                       The receiver disconnected, canceled the transfer, or a network error occurred.
+                     </p>
+                     
+                     <button 
+                       onClick={() => {
+                         cleanupP2P();
+                         // Reset session state so user goes back to the upload screen
+                         setSessionInfo((prev) => ({ ...prev, uploadStatus: "idle", newRequest: false }));
+                       }}
+                       className="px-4 py-1.5 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold rounded-md transition duration-200"
+                     >
+                       Dismiss & Try Again
+                     </button>
+                  </div>
+                )}
                 
                 {p2pStatus !== "complete" && p2pStatus !== "error" && (
                   <p className="text-xs text-gray-400 mt-4">

@@ -191,19 +191,22 @@ const FileList = ({ retry }) => {
         {files.length > 0 && sessionInfo.uploadStatus === "idle" && (
           <div
             ref={endRef}
-            className="flex justify-between text-xs sm:text-sm text-neutral-500"
+            className="flex justify-between text-xs sm:text-sm text-neutral-500 mt-2"
           >
             <span className="flex-1" />
-            <p className="hidden sm:block flex-1">
+            <p className="hidden sm:block flex-1 text-center">
               {isDragActive ? "Drop files here" : "Drag and drop files.."}
             </p>
-            <span>
+            <span className="flex-1 flex justify-end">
               <button
                 type="button"
-                className="flex-1 bg-neutral-900 px-2 py-1 rounded-md hover:text-neutral-400 "
-                onClick={() => clearFiles()}
+                className="bg-neutral-900 px-3 py-1 rounded-md hover:text-red-400 transition-colors z-50 relative"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearFiles();
+                }}
               >
-                Clear
+                Clear All
               </button>
             </span>
           </div>
