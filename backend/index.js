@@ -83,13 +83,21 @@ app.use("/api/file", fileRoutes);
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id, socket.handshake.headers.origin);
 
-  socket.on("join-room", (stashKey) => {
-    // This will log exactly who is trying to join which room
-    console.log("JOIN ROOM:", stashKey, socket.id);
+  // --- THE FIX: Accept a 'role' parameter to distinguish senders from receivers ---
+  socket.on("join-room", (stashKey, role) => {
+    console.log(`JOIN ROOM: ${stashKey} | Role: ${role || "unknown"} | Socket: ${socket.id}`);
 
     const room = io.sockets.adapter.rooms.get(stashKey);
     const numClients = room ? room.size : 0;
 
+    // Bouncer Check 1: If a RECEIVER tries to join an empty room, the key is invalid
+    if (role === "receiver" && numClients === 0) {
+      socket.emit("invalid-room");
+      console.log(`Socket ${socket.id} rejected. Invalid key: ${stashKey}.`);
+      return; 
+    }
+
+    // Bouncer Check 2: Room is full (1 sender + 1 receiver max)
     if (numClients >= 2) {
       socket.emit("room-full");
       console.log(`Socket ${socket.id} rejected. Room ${stashKey} is full.`);
@@ -101,9 +109,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("signal", (data) => {
-    // This will track the WebRTC handshake (offer, answer, candidate)
     console.log("SIGNAL:", data.signal.type);
-
     socket.to(data.stashKey).emit("signal", data.signal);
   });
   

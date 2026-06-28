@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useRef, useCallback } from "react";
 import { io } from "socket.io-client";
 import { apiUrl } from "../utils/api";
+import toast from "react-hot-toast"; // <-- NEW: Added toast for invalid key notification
 
 const CHUNK_SIZE = 256 * 1024;
 
@@ -14,7 +15,6 @@ export const P2PProvider = ({ children }) => {
   const [speed, setSpeed] = useState(0);
   const [eta, setEta] = useState(0);
   const [fileMetadata, setFileMetadata] = useState(null); 
-  // --- NEW: Role state to fix UI bleed between upload and download pages ---
   const [role, setRole] = useState(null); 
   
   const socketRef = useRef(null);
@@ -87,14 +87,15 @@ export const P2PProvider = ({ children }) => {
   const startHosting = useCallback((stashKey, filesToSend) => {
     initSocket();
     stashKeyRef.current = stashKey;
-    setRole("sender"); // <-- NEW: Sets role to sender
+    setRole("sender");
     setP2pStatus("waiting");
     pendingCandidatesRef.current = [];
 
     socketRef.current.off("peer-joined");
     socketRef.current.off("signal");
 
-    socketRef.current.emit("join-room", stashKey);
+    // --- UPDATED: Pass "sender" role to the backend ---
+    socketRef.current.emit("join-room", stashKey, "sender");
 
     socketRef.current.on("peer-joined", async () => {
       if (peerRef.current) return; 
@@ -234,20 +235,36 @@ export const P2PProvider = ({ children }) => {
   const joinSession = useCallback((stashKey) => {
     initSocket();
     stashKeyRef.current = stashKey;
-    setRole("receiver"); // <-- NEW: Sets role to receiver
+    setRole("receiver");
     setP2pStatus("connecting");
     pendingCandidatesRef.current = [];
 
     socketRef.current.off("signal");
     socketRef.current.off("room-full");
+    socketRef.current.off("invalid-room"); // <-- Clear previous listener
 
-    socketRef.current.emit("join-room", stashKey);
+    // --- UPDATED: Pass "receiver" role to the backend ---
+    socketRef.current.emit("join-room", stashKey, "receiver");
+
+    // --- NEW: Silently reject invalid keys and show toast ---
+    socketRef.current.on("invalid-room", () => {
+      setP2pStatus("idle");
+      toast.error("Invalid key or transfer expired");
+
+      if (socketRef.current) {
+        socketRef.current.off("signal");
+        socketRef.current.off("room-full");
+        socketRef.current.off("invalid-room");
+      }
+      return;
+    });
 
     socketRef.current.on("room-full", () => {
       setP2pStatus("error");
       if (socketRef.current) {
         socketRef.current.off("signal");
         socketRef.current.off("room-full");
+        socketRef.current.off("invalid-room"); // <-- Clear invalid-room listener too
       }
       return; 
     });
@@ -281,13 +298,11 @@ export const P2PProvider = ({ children }) => {
             fileDataRef.current.receivedSize = 0; 
             fileDataRef.current.startTime = Date.now(); 
             
-            // --- UPDATED: Optimized State Sequence ---
             setFileMetadata(msg.data);
             setProgress(0); 
             setSpeed(0);
             setEta(0);
             setP2pStatus("transferring"); 
-            // -----------------------------------------
             
             lastPercent = 0;
             lastUpdateTime = Date.now();
@@ -378,7 +393,6 @@ export const P2PProvider = ({ children }) => {
   };
 
   const cleanupP2P = useCallback(() => {
-    // --- UPDATED: Aggressive cleanup to prevent ghost connections ---
     if (channelRef.current) {
       channelRef.current.onopen = null;
       channelRef.current.onmessage = null;
@@ -399,6 +413,7 @@ export const P2PProvider = ({ children }) => {
       socketRef.current.off("signal");
       socketRef.current.off("peer-joined");
       socketRef.current.off("room-full");
+      socketRef.current.off("invalid-room"); // <-- NEW: Cleaned up listener
     }
     
     stashKeyRef.current = "";
@@ -410,7 +425,7 @@ export const P2PProvider = ({ children }) => {
     setSpeed(0); 
     setEta(0);   
     setFileMetadata(null); 
-    setRole(null); // <-- NEW: Reset role to fix UI bleed
+    setRole(null); 
   }, []);
 
   const cancelTransfer = useCallback(() => {
@@ -430,7 +445,7 @@ export const P2PProvider = ({ children }) => {
       speed,      
       eta,
       fileMetadata,
-      role, // <-- NEW: Export role for UI checks
+      role,
       cleanupP2P, 
       cancelTransfer 
     }}>

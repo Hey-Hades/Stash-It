@@ -203,8 +203,8 @@ const Main = () => {
             {transferMode === "p2p" && (
               <div className="mt-6 p-4 border border-neutral-700 rounded-md bg-neutral-900 text-center text-white">
                 
-                {/* Hide Header on Error */}
-                {p2pStatus !== "error" && (
+                {/* Hide Header on Error/Complete */}
+                {p2pStatus !== "error" && p2pStatus !== "complete" && (
                   <h3 className="text-md sm:text-lg font-bold mb-2">P2P Direct Transfer</h3>
                 )}
                 
@@ -239,10 +239,28 @@ const Main = () => {
                   </div>
                 )}
                 
+                {/* --- SLEEK SENDER COMPLETE BLOCK --- */}
                 {p2pStatus === "complete" && (
-                  <div className="py-2">
-                    <div className="text-4xl mb-2">🎉</div>
-                    <p className="text-green-400 font-bold text-lg">Transfer Complete!</p>
+                  <div className="py-2 flex flex-col items-center text-center">
+                     <div className="bg-green-500/10 p-3 rounded-full mb-3">
+                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                       </svg>
+                     </div>
+                     <p className="text-green-400 font-medium text-lg mb-1">Transfer Complete</p>
+                     <p className="text-xs text-neutral-400 max-w-[250px] mx-auto mb-4">
+                       The file was successfully sent to the receiver.
+                     </p>
+                     
+                     <button 
+                       onClick={() => {
+                         cleanupP2P();
+                         setSessionInfo((prev) => ({ ...prev, uploadStatus: "idle", newRequest: false }));
+                       }}
+                       className="px-4 py-1.5 border border-neutral-600 hover:bg-neutral-800 text-neutral-300 text-xs font-semibold rounded-md transition duration-200"
+                     >
+                       Send Another File
+                     </button>
                   </div>
                 )}
 
@@ -256,13 +274,12 @@ const Main = () => {
                      </div>
                      <p className="text-red-400 font-medium text-lg mb-1">Transfer Failed</p>
                      <p className="text-xs text-neutral-400 max-w-[250px] mx-auto mb-4">
-                       The receiver disconnected, canceled the transfer, or a network error occurred.
+                       The receiver disconnected, cancelled the transfer, or a network error occurred.
                      </p>
                      
                      <button 
                        onClick={() => {
                          cleanupP2P();
-                         // Reset session state so user goes back to the upload screen
                          setSessionInfo((prev) => ({ ...prev, uploadStatus: "idle", newRequest: false }));
                        }}
                        className="px-4 py-1.5 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold rounded-md transition duration-200"
@@ -274,7 +291,7 @@ const Main = () => {
                 
                 {p2pStatus !== "complete" && p2pStatus !== "error" && (
                   <p className="text-xs text-gray-400 mt-4">
-                    ⚠️ Keep this tab open until the transfer completes.
+                    ⚠️ Refresh and Regret :)
                   </p>
                 )}
               </div>
@@ -284,7 +301,7 @@ const Main = () => {
       </div>
       
       {/* Mobile floating action button */}
-      <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 md:hidden">
+      <div className="absolute bottom-18 left-1/2 z-20 -translate-x-1/2 md:hidden">
         {sessionInfo.uploadStatus === "idle" && <AddFile />}
       </div>
     </div>

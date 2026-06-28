@@ -167,10 +167,16 @@ const Download = () => {
           )}
           
           {p2pStatus === "complete" && (
-            <div className="py-2">
-               <div className="text-4xl mb-2">🎉</div>
-               <p className="text-green-400 font-bold text-lg mb-1">File Received!</p>
-               <p className="text-xs text-neutral-400 mb-4">Your browser has automatically downloaded the file.</p>
+            <div className="py-2 flex flex-col items-center">
+               <div className="bg-green-500/10 p-3 rounded-full mb-3">
+                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                 </svg>
+               </div>
+               <p className="text-green-400 font-medium text-lg mb-1">Transfer Complete</p>
+               <p className="text-xs text-neutral-400 max-w-[250px] mx-auto mb-4">
+                 Your browser has automatically downloaded the file.
+               </p>
                
                <button 
                  onClick={cleanupP2P}
@@ -191,7 +197,7 @@ const Download = () => {
                </div>
                <p className="text-red-400 font-medium text-lg mb-1">Transfer Failed</p>
                <p className="text-xs text-neutral-400 max-w-[250px] mx-auto">
-                 The sender disconnected, canceled the transfer, or the link is invalid.
+                 The sender disconnected, cancelled the transfer, or a network error occurred.
                </p>
             </div>
           )}
